@@ -1,0 +1,36 @@
+There is an Epoch Date in a Cell (B7) and I want to convert that to UTC and Local Time Zone and adjust for Daylight Saving.
+CST = 6 hour difference
+CDT = 5 hour difference
+
+Cell B7 = 1182355546
+Cell D7 UTC = 2007-06-20 16:05:46
+Cell E7 Central = 2007-06-20 10:05:46
+
+
+Convert B7 to UTC Date Time (86,400 = seconds (60) * minutes (60) * hours (24))
+=DATE(1970, 1, 1) + (B7 / 86400)
+
+Compare to see if DATETIME is BEFORE Daylight Saving in March 2:00 AM
+=D7<DATE(YEAR(D7), 3, 1) + 14 - WEEKDAY(DATE(YEAR(D7), 3, 1) - 1) + TIME(2, 0, 0)
+
+Compare to see if DATETIME is AFTER Daylight Saving in November 2:00 AM
+=D7>=DATE(YEAR(D7), 11, 1) + 7 - WEEKDAY(DATE(YEAR(D7), 11, 1) - 1) + TIME(2, 0, 0)
+
+Compare to see if DATETIME is between March and November 2:00 AM (formatted for readability)
+This is if I converted it to UTC already
+=IF(AND(
+    D7 > DATE(YEAR(D7), 3, 1) + 14 - WEEKDAY(DATE(YEAR(D7), 3, 1) - 1) + TIME(2, 0, 0), 
+    D7 < DATE(YEAR(D7), 11, 1) + 7 - WEEKDAY(DATE(YEAR(D7), 11, 1 ) - 1) + TIME(2, 0, 0)
+    ),
+      (B7 / 86400) + DATE(1970, 1, 1) - 6 / 24,
+      (B7 / 86400) + DATE(1970, 1 ,1) - 5 / 24)
+
+Compare to see if DATETIME is between March and November 2:00 AM (formatted for readability)
+This is if I did not convert already in D7 and convert from the Epoch Date
+=IF(AND(
+    (DATE(1970, 1, 1) + (B7 / 86400)) > DATE(YEAR(DATE(1970, 1, 1) + (B7 / 86400)), 3 , 1) + 14 - WEEKDAY(DATE(YEAR(DATE(1970, 1, 1) + (B7 / 86400)), 3 , 1) - 1) + TIME(2, 0, 0), 
+    (DATE(1970, 1, 1) + (B7 / 86400)) < DATE(YEAR(DATE(1970, 1, 1) + (B7 / 86400)), 11, 1) + 7 - WEEKDAY(DATE(YEAR(DATE(1970, 1, 1) + (B7 / 86400)), 11, 1) - 1) + TIME(2, 0, 0)
+    ),
+      (B7 / 86400) + DATE(1970, 1, 1) - 6 / 24,
+      (B7 / 86400) + DATE(1970, 1, 1) - 5 / 24)
+
